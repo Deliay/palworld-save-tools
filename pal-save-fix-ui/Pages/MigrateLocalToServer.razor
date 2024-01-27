@@ -1,0 +1,115 @@
+﻿@page "/migrate-local-to-server"
+
+@using pal_save_fix_ui.Data.Processors
+@inject ILogger<MigrateLocalToServer> Logger
+@inject IJSRuntime JS
+@implements IDisposable
+
+<h3>Migrate LocalSave To Server</h3>
+<p>
+    This tools can migrate your local Palworld save to dedicated server save
+        (use <a target="_blank" href="https://github.com/xNul/palworld-host-save-fix">this</a> tool)
+</p>
+
+
+@if (!isLoading)
+{
+    <h4>Step 1. Mapping old player GUID to new player GUID</h4>
+    <div class="input-group mb-3">
+        <span class="input-group-text">from</span>
+        <input type="text" class="form-control" placeholder="old guid" aria-label="old guid" @bind-value="oldGuid">
+        <span class="input-group-text">to</span>
+        <input type="text" class="form-control" placeholder="new guid" aria-label="new guid" @bind-value="newGuid">
+        <button class="btn btn-primary" @onclick="() => AddGuidPair(oldGuid, newGuid)">Add</button>
+    </div>
+    <div class=" mb-3">
+        @foreach (var (from, to) in GuidMapping)
+        {
+            <div class="input-group">
+                <span class="input-group-text">from</span>
+                <input disabled type="text" class="form-control" placeholder="old guid" aria-label="old guid" value="@from">
+                <span class="input-group-text">to</span>
+                <input disabled type="text" class="form-control" placeholder="new guid" aria-label="new guid" value="@to">
+                <button class="btn btn-danger" @onclick="() => Remove(from)">Remove</button>
+            </div>
+        }
+    </div>
+
+    <h4>Step 2. Upload your save files and start processing</h4>
+    <div class="mb-3">
+        <div class="input-group">
+            <InputFile disabled="@UploadNotReady" OnChange="@ProcessFile" class="form-control" id="save-file-uploader" accept="application/zip" />
+        </div>
+        @if (UploadNotReady)
+        {
+            <div class="form-text">Before upload save archive, at least mapping one GUID pair</div>
+        }
+        else
+        {
+            <div class="form-text">NOTE: the zip archive must includes your save folder</div>
+        }
+    </div>
+
+    <h4>Step 3. Procceed archive will be download automatically</h4>
+}
+<script>
+    window.downloadFileFromStream = async (fileName, contentStreamReference) => {
+        const arrayBuffer = await contentStreamReference.arrayBuffer();
+        const blob = new Blob([arrayBuffer]);
+        const url = URL.createObjectURL(blob);
+        const anchorElement = document.createElement('a');
+        anchorElement.href = url;
+        anchorElement.download = fileName ?? '';
+        anchorElement.click();
+        anchorElement.remove();
+        URL.revokeObjectURL(url);
+    }
+</script>
+
+@if (ProcessLogs.Count > 0)
+{
+    <div class="progress" role="progressbar" aria-label="Process progress" aria-valuenow="@progress" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-bar" style="width: @progress%">@LastLog</div>
+    </div>
+
+    <h4>Process logs</h4>
+    <div class="mb-3">
+        <pre>
+            @foreach (var log in ProcessLogs)
+            {
+            <code>@log</code>
+            }
+        </pre>
+    </div>
+}
+
+@code {
+
+    private List<IBrowserFile> loadedFiles = [];
+    private List<string> ProcessLogs = [];
+    private long maxFileSize = 128000;
+    private int maxAllowedFiles = 1;
+    private bool isLoading;
+    private string oldGuid = "";
+    private string newGuid = "";
+
+    private bool UploadNotReady => GuidMapping.Count == 0;
+
+    private void AddGuidPair(string from, string to)
+    {
+        if (string.IsNullOrWhiteSpace(from) || string.IsNullOrWhiteSpace(to))
+        {
+            return;
+        }
+
+        if (GuidMapping.ContainsKey(from))
+            GuidMapping[from] = to;
+        else
+            GuidMapping.Add(from, to);
+    }
+
+    private void Remove(string from)
+    {
+        GuidMapping.Remove(from);
+    }
+}
