@@ -16,7 +16,7 @@ FROM archlinux/archlinux:latest as base
 USER root
 RUN pacman -Sy
 RUN pacman -S --noconfirm rust python git dotnet-sdk dotnet-runtime
-RUN useradd -s /bin/bash app
+RUN useradd -m -s /bin/bash app
 USER app
 RUN cargo install --git https://github.com/trumank/uesave-rs.git
 WORKDIR /app
