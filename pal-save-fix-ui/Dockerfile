@@ -15,7 +15,7 @@ RUN dotnet publish "./pal-save-fix-ui.csproj" -c $BUILD_CONFIGURATION -o /app/pu
 FROM archlinux/archlinux:latest as base
 USER root
 RUN pacman -Sy
-RUN pacman -S --noconfirm rust python git node dotnet-sdk dotnet-runtime
+RUN pacman -S --noconfirm rust python git dotnet-sdk dotnet-runtime
 
 USER app
 RUN cargo install --git https://github.com/trumank/uesave-rs.git
