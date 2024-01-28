@@ -28,5 +28,7 @@ RUN export SCRIPT=$(ls $PWD/**/fix-host-save.py)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+RUN git clone https://github.com/xNul/palworld-host-save-fix.git
+EXPOSE 80
 
 ENTRYPOINT ["dotnet", "pal-save-fix-ui.dll"]
