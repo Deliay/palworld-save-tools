@@ -12,20 +12,7 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./pal-save-fix-ui.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 
-FROM archlinux/archlinux:latest as base
-USER root
-RUN pacman -Sy
-RUN pacman -S --noconfirm rust python git dotnet-sdk dotnet-runtime aspnet-runtime
-RUN useradd -m -s /bin/bash app
-USER app
-RUN cargo install --git https://github.com/trumank/uesave-rs.git
-WORKDIR /app
-RUN git clone https://github.com/xNul/palworld-host-save-fix.git
-
-RUN export UESAVE=$(ls ~/.cargo/bin/uesave)
-RUN export SCRIPT=$(ls $PWD/**/fix-host-save.py)
-
-FROM base AS final
+FROM zeroash/pal-save-tools-base AS final
 WORKDIR /app
 RUN rm -rf palworld-host-save-fix
 RUN git clone https://github.com/Deliay/palworld-host-save-fix.git
