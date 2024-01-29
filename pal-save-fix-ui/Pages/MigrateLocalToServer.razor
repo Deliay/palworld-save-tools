@@ -1,8 +1,8 @@
 ﻿@page "/migrate-local-to-server"
 
-@using pal_save_fix_ui.Data.Processors
 @inject ILogger<MigrateLocalToServer> Logger
 @inject IJSRuntime JS
+@using System.IO
 @implements IDisposable
 
 <h3>Migrate LocalSave To Server</h3>
@@ -11,9 +11,8 @@
         (use <a target="_blank" href="https://github.com/xNul/palworld-host-save-fix">this</a> tool)
 </p>
 
-
-@if (!isLoading)
-{
+<div style="@(isLoading ? "display: none" : "")">
+    
     <h4>Step 1. Mapping old player GUID to new player GUID</h4>
     <div class="input-group mb-3">
         <span class="input-group-text">from</span>
@@ -50,8 +49,8 @@
         }
     </div>
 
-    <h4>Step 3. Procceed archive will be download automatically</h4>
-}
+    <h4>Step 3. Proceed archive will be download automatically</h4>
+</div>
 <script>
     window.downloadFileFromStream = async (fileName, contentStreamReference) => {
         const arrayBuffer = await contentStreamReference.arrayBuffer();
@@ -69,7 +68,7 @@
 @if (ProcessLogs.Count > 0)
 {
     <div class="progress" role="progressbar" aria-label="Process progress" aria-valuenow="@progress" aria-valuemin="0" aria-valuemax="100">
-        <div class="progress-bar" style="width: @progress%">@LastLog</div>
+        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: @progress%">@LastLog</div>
     </div>
 
     <h4>Process logs</h4>
@@ -77,7 +76,8 @@
         <pre>
             @foreach (var log in ProcessLogs)
             {
-            <code>@log</code>
+                <code>@log</code>
+                <br />
             }
         </pre>
     </div>
@@ -87,7 +87,7 @@
 
     private List<IBrowserFile> loadedFiles = [];
     private List<string> ProcessLogs = [];
-    private long maxFileSize = 128000;
+    private long maxFileSize = 51200000;
     private int maxAllowedFiles = 1;
     private bool isLoading;
     private string oldGuid = "";
@@ -102,10 +102,7 @@
             return;
         }
 
-        if (GuidMapping.ContainsKey(from))
-            GuidMapping[from] = to;
-        else
-            GuidMapping.Add(from, to);
+        GuidMapping[from] = to;
     }
 
     private void Remove(string from)

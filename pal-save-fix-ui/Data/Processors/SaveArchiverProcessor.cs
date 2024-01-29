@@ -3,25 +3,29 @@
 namespace pal_save_fix_ui.Data.Processors;
 public abstract class SaveArchiverProcessor : IDisposable
 {
-    private string _newArchiveName = Path.GetTempFileName();
+    protected static readonly string UnrealEngineSaveTools = Environment.GetEnvironmentVariable("UESAVE")
+        ?? throw new InvalidOperationException("Missing ue-save tools");
 
-    public static readonly string UnrealEngineSaveTools = Environment.GetEnvironmentVariable("UESAVE")
-        ?? throw new InvalidOperationException("Missing uesave tools");
-
-    public static readonly string ScriptPath = Environment.GetEnvironmentVariable("SCRIPT")
+    protected static readonly string ScriptPath = Environment.GetEnvironmentVariable("SCRIPT")
         ?? throw new InvalidOperationException("Missing script");
 
-    public static readonly string ScriptFolder = Path.GetDirectoryName(ScriptPath)
+    protected static readonly string ScriptFolder = Path.GetDirectoryName(ScriptPath)
         ?? throw new InvalidOperationException("Missing script folder");
 
-    public SaveArchiverProcessor(Stream archive)
+    protected SaveArchiverProcessor(Stream archive)
     {
         Archive = new ZipArchive(archive);
 
-        LevelEntry = Archive.Entries.Where(entry => entry.FullName.EndsWith("Level.sav")).Single()
-            ?? throw new InvalidDataException();
+        var saveFiles = Archive.Entries.Where(entry => entry.FullName.EndsWith("Level.sav")).ToList();
 
-        TempDirectory = Path.GetTempPath();
+        LevelEntry = saveFiles.Count switch
+        {
+            > 1 => throw new InvalidOperationException("There are more than one Level.sav in archive."),
+            0 => throw new InvalidOperationException("No Level.sav in archive."),
+            _ => saveFiles[0]
+        };
+
+        TempDirectory = Path.Combine(Path.GetTempPath(), $"pal-save-tools-{Guid.NewGuid().ToString()}");
     }
 
     public ZipArchive Archive { get; }
@@ -38,25 +42,23 @@ public abstract class SaveArchiverProcessor : IDisposable
 
     public Stream ArchiveFiles()
     {
-        _newArchiveName = Path.GetTempFileName();
-        ZipFile.CreateFromDirectory(TempDirectory, _newArchiveName);
-
-        return File.OpenRead(_newArchiveName);
+        var ms = new MemoryStream();
+        ZipFile.CreateFromDirectory(TempDirectory, ms);
+        ms.Position = 0;
+        return ms;
     }
 
     public void Dispose()
     {
         GC.SuppressFinalize(this);
-        using var _Archive = Archive;
+        using var archive = Archive;
         try
         {
             Directory.Delete(TempDirectory, true);
         }
-        finally { }
-        try
+        catch
         {
-            File.Delete(_newArchiveName);
+            // ignored
         }
-        finally { }
     }
 }
