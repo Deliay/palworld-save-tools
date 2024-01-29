@@ -7,22 +7,22 @@ namespace pal_save_fix_ui.Data.Processors;
 public class MigrateLocalToServerProcessor(Stream archive) : SaveArchiverProcessor(archive)
 {
 
-    private IEnumerable<string> Args(string oldGuid, string newGuid)
+    private IEnumerable<string> Args(string from, string to)
     {
         yield return ScriptPath;
         yield return UnrealEngineSaveTools;
         yield return SaveFolder;
-        yield return newGuid;
-        yield return oldGuid;
+        yield return to;
+        yield return from;
     }
 
     public async IAsyncEnumerable<string> Migrate(Dictionary<string, string> userIdMapping, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        foreach (var (oldGuid, newGuid) in userIdMapping)
+        foreach (var (from, to) in userIdMapping)
         {
             var process = new Process()
             {
-                StartInfo = new ProcessStartInfo("python", Args(oldGuid, newGuid))
+                StartInfo = new ProcessStartInfo("python", Args(from, to))
                 {
                     WorkingDirectory = ScriptFolder,
                     CreateNoWindow = true,
@@ -31,8 +31,8 @@ public class MigrateLocalToServerProcessor(Stream archive) : SaveArchiverProcess
                 },
             };
             process.Start();
-
-            yield return $"Start processing {oldGuid} to {newGuid}, pid={process.Id}...";
+            yield return $"Start processing {from} to {to}, pid={process.Id}...";
+            yield return $"Run: {process.StartInfo.FileName} {process.StartInfo.Arguments}";
             yield return $"This will take about 2 minutes...";
             do
             {
@@ -47,7 +47,7 @@ public class MigrateLocalToServerProcessor(Stream archive) : SaveArchiverProcess
             yield return errLog;
 
             await process.WaitForExitAsync(cancellationToken);
-            yield return $"{oldGuid} to {newGuid} proceed, pid={process.Id} exited with {process.ExitCode}";
+            yield return $"{from} to {to} proceed, pid={process.Id} exited with {process.ExitCode}";
         }
     }
 
