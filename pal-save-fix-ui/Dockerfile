@@ -18,6 +18,7 @@ RUN rm -rf palworld-host-save-fix
 RUN git clone https://github.com/Deliay/palworld-host-save-fix.git
 RUN export SCRIPT=$(ls $PWD/**/fix-host-save.py)
 COPY --from=publish /app/publish .
+ENV ASPNETCORE_URLS http://*:8080
 EXPOSE 8080
 
 ENTRYPOINT ["dotnet", "pal-save-fix-ui.dll"]
