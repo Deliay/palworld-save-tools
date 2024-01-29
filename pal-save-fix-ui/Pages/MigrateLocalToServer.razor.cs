@@ -68,7 +68,7 @@ namespace pal_save_fix_ui.Pages
                     }
                     progress = 90;
                     
-                    Log("Operation completed. Archiving proceed files");
+                    Log("Operation completed. Archiving processed files");
 
                     progress = 95;
                     Log("Downloading files...");

@@ -8,12 +8,16 @@
 <h3>Migrate LocalSave To Server</h3>
 <p>
     This tools can migrate your local Palworld save to dedicated server save
-        (use <a target="_blank" href="https://github.com/xNul/palworld-host-save-fix">this</a> tool)
+    (use <a target="_blank" href="https://github.com/xNul/palworld-host-save-fix">this</a> tool)
+</p>
+<p>
+    Please read <a target="_blank" href="https://github.com/xNul/palworld-host-save-fix/blob/main/README.md">THIS</a>
+    document carefully before starting the conversion operation.
 </p>
 
 <div style="@(isLoading ? "display: none" : "")">
     
-    <h4>Step 1. Mapping old player GUID to new player GUID</h4>
+    <h4>Step 1. Map the old player GUID to the new player GUID</h4>
     <div class="input-group mb-3">
         <span class="input-group-text">from</span>
         <input type="text" class="form-control" placeholder="old guid" aria-label="old guid" @bind-value="oldGuid">
@@ -34,22 +38,22 @@
         }
     </div>
 
-    <h4>Step 2. Upload your save files and start processing</h4>
+    <h4>Step 2. Upload the archive of your saved files and start processing</h4>
     <div class="mb-3">
         <div class="input-group">
             <InputFile disabled="@UploadNotReady" OnChange="@ProcessFile" class="form-control" id="save-file-uploader" accept="application/zip" />
         </div>
         @if (UploadNotReady)
         {
-            <div class="form-text">Before upload save archive, at least mapping one GUID pair</div>
+            <div class="form-text">Before uploading the save archive, at least map one GUID pair</div>
         }
         else
         {
-            <div class="form-text">NOTE: the zip archive must includes your save folder</div>
+            <div class="form-text">NOTE: The zip archive must include your save folder</div>
         }
     </div>
 
-    <h4>Step 3. Proceed archive will be download automatically</h4>
+    <h4>Step 3. The converted save archive will be downloaded automatically</h4>
 </div>
 <script>
     window.downloadFileFromStream = async (fileName, contentStreamReference) => {
@@ -73,7 +77,7 @@
 
     <h4>Process logs</h4>
     <div class="mb-3">
-        <pre>
+        <pre style="white-space: pre-wrap; word-wrap: break-word; word-break: break-word;">
             @foreach (var log in ProcessLogs)
             {
                 <code>@log</code>
