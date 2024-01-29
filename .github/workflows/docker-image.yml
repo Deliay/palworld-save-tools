@@ -13,10 +13,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file pal-save-fix-ui/Dockerfile --tag zeroash/pal-save-tools:latest
+      run: docker build . --file PalworldToolset/Dockerfile --tag zeroash/palworld-toolset:latest
 
     - name: Login to registry
       run: docker login -u ${{secrets.DOCKER_USER}} -p ${{secrets.DOCKER_KEY}}
 
     - name: Push the Docker image
-      run: docker push zeroash/pal-save-tools:latest
+      run: docker push zeroash/palworld-toolset:latest

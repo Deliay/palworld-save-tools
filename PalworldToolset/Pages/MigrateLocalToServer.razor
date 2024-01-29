@@ -1,9 +1,6 @@
 ﻿@page "/migrate-local-to-server"
 
-@inject ILogger<MigrateLocalToServer> Logger
 @inject IJSRuntime JS
-@using System.IO
-@implements IDisposable
 
 <h3>Palworld Player Migrate Tool</h3>
 <p>
@@ -15,18 +12,18 @@
     document carefully before starting the conversion operation.
 </p>
 
-<div style="@(isLoading ? "display: none" : "")">
+<div style="@(_isLoading ? "display: none" : "")">
     
     <h4>Step 1. Map the old player GUID to the new player GUID</h4>
     <div class="input-group mb-3">
         <span class="input-group-text">from</span>
-        <input type="text" class="form-control" placeholder="old guid" aria-label="old guid" @bind-value="oldGuid">
+        <input type="text" class="form-control" placeholder="old guid" aria-label="old guid" @bind-value="_oldGuid">
         <span class="input-group-text">to</span>
-        <input type="text" class="form-control" placeholder="new guid" aria-label="new guid" @bind-value="newGuid">
-        <button class="btn btn-primary" @onclick="() => AddGuidPair(oldGuid, newGuid)">Add</button>
+        <input type="text" class="form-control" placeholder="new guid" aria-label="new guid" @bind-value="_newGuid">
+        <button class="btn btn-primary" @onclick="() => AddGuidPair(_oldGuid, _newGuid)">Add</button>
     </div>
     <div class=" mb-3">
-        @foreach (var (from, to) in GuidMapping)
+        @foreach (var (from, to) in _guidMapping)
         {
             <div class="input-group">
                 <span class="input-group-text">from</span>
@@ -69,16 +66,16 @@
     }
 </script>
 
-@if (ProcessLogs.Count > 0)
+@if (_processLogs.Count > 0)
 {
-    <div class="progress" role="progressbar" aria-label="Process progress" aria-valuenow="@progress" aria-valuemin="0" aria-valuemax="100">
-        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: @progress%">@LastLog</div>
+    <div class="progress" role="progressbar" aria-label="Process progress" aria-valuenow="@_progress" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: @_progress%">@_lastLog</div>
     </div>
 
     <h4>Process logs</h4>
     <div class="mb-3">
         <pre style="white-space: pre-wrap; word-wrap: break-word; word-break: break-word;">
-            @foreach (var log in ProcessLogs)
+            @foreach (var log in _processLogs)
             {
                 <code>@log</code>
                 <br />
@@ -88,16 +85,14 @@
 }
 
 @code {
+    private readonly List<string> _processLogs = [];
+    private const long MaxFileSize = 51200000;
+    private const int MaxAllowedFiles = 1;
+    private bool _isLoading;
+    private string _oldGuid = "";
+    private string _newGuid = "";
 
-    private List<IBrowserFile> loadedFiles = [];
-    private List<string> ProcessLogs = [];
-    private long maxFileSize = 51200000;
-    private int maxAllowedFiles = 1;
-    private bool isLoading;
-    private string oldGuid = "";
-    private string newGuid = "";
-
-    private bool UploadNotReady => GuidMapping.Count == 0;
+    private bool UploadNotReady => _guidMapping.Count == 0;
 
     private void AddGuidPair(string from, string to)
     {
@@ -106,11 +101,11 @@
             return;
         }
 
-        GuidMapping[from] = to;
+        _guidMapping[from] = to;
     }
 
     private void Remove(string from)
     {
-        GuidMapping.Remove(from);
+        _guidMapping.Remove(from);
     }
 }

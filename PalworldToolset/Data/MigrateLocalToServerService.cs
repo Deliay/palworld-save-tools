@@ -1,4 +1,4 @@
-﻿namespace pal_save_fix_ui.Data;
+﻿namespace PalworldToolset.Data;
 
 public class MigrateLocalToServerService
 {

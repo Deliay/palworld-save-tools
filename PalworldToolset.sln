@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34511.84
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pal-save-fix-ui", "pal-save-fix-ui\pal-save-fix-ui.csproj", "{242CC6AB-8487-4CB1-B581-DC57AB0495D1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PalworldToolset", "PalworldToolset\PalworldToolset.csproj", "{242CC6AB-8487-4CB1-B581-DC57AB0495D1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,53 +1,45 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
-using pal_save_fix_ui.Data.Processors;
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.IO.Pipelines;
-using System.IO.Pipes;
-using PipeOptions = System.IO.Pipelines.PipeOptions;
+using PalworldToolset.Data.Processors;
 
-namespace pal_save_fix_ui.Pages
+namespace PalworldToolset.Pages
 {
     public partial class MigrateLocalToServer : IDisposable
     {
         private readonly CancellationTokenSource _cts = new();
 
-        private readonly Dictionary<string, string> GuidMapping = [];
+        private readonly Dictionary<string, string> _guidMapping = [];
 
         public void Dispose()
         {
             GC.SuppressFinalize(this);
-            using var __cts = _cts;
+            using var cts = _cts;
         }
 
-        private string LastLog = string.Empty;
+        private string _lastLog = string.Empty;
 
         private void Log(string message)
         {
-            ProcessLogs.Add(message);
-            LastLog = message;
+            _processLogs.Add(message);
+            _lastLog = message;
             StateHasChanged();
         }
 
-        private int progress = 0;
+        private int _progress;
 
         private async Task ProcessFile(InputFileChangeEventArgs e)
         {
-            isLoading = true;
-            ProcessLogs.Clear();
+            _isLoading = true;
+            _processLogs.Clear();
             StateHasChanged();
-            loadedFiles.Clear();
 
-            foreach (var file in e.GetMultipleFiles(maxAllowedFiles))
+            foreach (var file in e.GetMultipleFiles(MaxAllowedFiles))
             {
                 try
                 {
-                    progress = 10;
+                    _progress = 10;
                     Log("Uploading files");
-                    await using var fileStream = file.OpenReadStream(maxFileSize, _cts.Token);
+                    await using var fileStream = file.OpenReadStream(MaxFileSize, _cts.Token);
                     // var pipe = new Pipe(new PipeOptions(useSynchronizationContext: false));
                     // await fileStream.CopyToAsync(pipe.Writer, _cts.Token);
                     // await using var readStream = pipe.Reader.AsStream();
@@ -55,22 +47,22 @@ namespace pal_save_fix_ui.Pages
                     await fileStream.CopyToAsync(memoryStream, _cts.Token);
                     using var processor = new MigrateLocalToServerProcessor(memoryStream);
                     
-                    progress = 30;
+                    _progress = 30;
                     Log("Extracting files...");
                     processor.ExtractAllFiles();
                     Log("Files extracted!");
-                    progress = 40;
-                    var each = 50 / GuidMapping.Count;
-                    await foreach(var log in processor.Migrate(GuidMapping, _cts.Token))
+                    _progress = 40;
+                    var each = 50 / _guidMapping.Count;
+                    await foreach(var log in processor.Migrate(_guidMapping, _cts.Token))
                     {
                         Log(log);
-                        progress += each;
+                        _progress += each;
                     }
-                    progress = 90;
+                    _progress = 90;
                     
                     Log("Operation completed. Archiving processed files");
 
-                    progress = 95;
+                    _progress = 95;
                     Log("Downloading files...");
                     var fileName = $"{Path.GetFileNameWithoutExtension(file.Name)}-to-dedicated-save.zip";
 
@@ -78,7 +70,7 @@ namespace pal_save_fix_ui.Pages
 
                     await JS.InvokeVoidAsync("downloadFileFromStream", _cts.Token, fileName, streamRef);
                     Log("Done");
-                    progress = 100;
+                    _progress = 100;
                 }
                 catch (Exception ex)
                 {
@@ -86,7 +78,7 @@ namespace pal_save_fix_ui.Pages
                 }
             }
 
-            isLoading = false;
+            _isLoading = false;
         }
     }
 }

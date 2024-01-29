@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-using pal_save_fix_ui.Data;
-using pal_save_fix_ui.Data.Processors;
+using PalworldToolset.Data;
+using PalworldToolset.Data.Processors;
 
 var builder = WebApplication.CreateBuilder(args);
 
