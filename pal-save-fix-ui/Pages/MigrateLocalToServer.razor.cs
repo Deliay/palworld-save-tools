@@ -82,7 +82,7 @@ namespace pal_save_fix_ui.Pages
                 }
                 catch (Exception ex)
                 {
-                    Log($"File: {file.Name} Error: {ex.Message}");
+                    Log($"File: {file.Name} Error: {ex.Message}\n{ex.StackTrace}");
                 }
             }
 
