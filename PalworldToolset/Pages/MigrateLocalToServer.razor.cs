@@ -64,7 +64,7 @@ namespace PalworldToolset.Pages
 
                     _progress = 95;
                     Log("Downloading files...");
-                    var fileName = $"{Path.GetFileNameWithoutExtension(file.Name)}-to-dedicated-save.zip";
+                    var fileName = $"migrated-{Path.GetFileNameWithoutExtension(file.Name)}.zip";
 
                     using var streamRef = new DotNetStreamReference(stream: processor.ArchiveFiles());
 
