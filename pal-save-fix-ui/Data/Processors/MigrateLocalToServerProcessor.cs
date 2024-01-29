@@ -41,13 +41,11 @@ public class MigrateLocalToServerProcessor(Stream archive) : SaveArchiverProcess
                 {
                     yield return log;
                 }
-                var errLog = await process.StandardError.ReadLineAsync(cancellationToken);
-                if (errLog != null)
-                {
-                    yield return errLog;
-                }
             } while (!cancellationToken.IsCancellationRequested && !process.HasExited);
             
+            var errLog = await process.StandardError.ReadToEndAsync(cancellationToken);
+            yield return errLog;
+
             await process.WaitForExitAsync(cancellationToken);
             yield return $"{oldGuid} to {newGuid} proceed, pid={process.Id} exited with {process.ExitCode}";
         }
