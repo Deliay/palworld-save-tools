@@ -14,10 +14,6 @@ RUN dotnet publish "./pal-save-fix-ui.csproj" -c $BUILD_CONFIGURATION -o /app/pu
 
 FROM zeroash/pal-save-tools-base AS final
 WORKDIR /app
-RUN rm -rf palworld-host-save-fix
-RUN git clone https://github.com/Deliay/palworld-host-save-fix.git
-RUN export UESAVE=$(ls ~/.cargo/bin/uesave)
-RUN export SCRIPT=$(ls $PWD/**/fix-host-save.py)
 COPY --from=publish /app/publish .
 COPY ./ops/entrypoint.sh .
 ENV ASPNETCORE_URLS http://*:8080

@@ -32,7 +32,7 @@ public class MigrateLocalToServerProcessor(Stream archive) : SaveArchiverProcess
             };
             process.Start();
             yield return $"Start processing {from} to {to}, pid={process.Id}...";
-            yield return $"Run: {process.StartInfo.FileName} {process.StartInfo.Arguments}";
+            yield return $"Run: {process.StartInfo.FileName} {string.Join(' ', process.StartInfo.ArgumentList)}";
             yield return $"This will take about 2 minutes...";
             do
             {
